@@ -3,7 +3,7 @@
 
 
 '''
-Solving the Gray-Scott-Model for pattern formation
+Solving the Gray-Scott model for pattern formation
 
 The model
     The Gray-Scott model is a system of reaction-diffusion equations describing
@@ -22,32 +22,8 @@ import sys
 
 from commandlineparser import CommandLineParser
 from grayscottproblem import GrayScottProblem
+from timestepper import TimeStepper
 from visualizer import Visualizer
-
-
-def snapshot_generator(timesteps, visualization_steps, mode='linear'):
-    if mode == 'linear':
-        points = np.linspace(0, timesteps, visualization_steps+1)
-    elif mode == 'log':
-        points = np.logspace(0, np.log10(timesteps+1), visualization_steps+1) - 1
-    elif mode == 'sqrt':
-        points = np.linspace(0, np.sqrt(timesteps+1), visualization_steps+1)**2
-    else:
-        raise ValueError('Unsupported mode')
-
-    int_points = [ round(x) for x in points ]
-    old_p = None
-    for p in int_points:
-        if old_p is None:
-            yield p
-            old_p = p
-        else:
-            if p <= old_p:
-                yield old_p + 1
-                old_p += 1
-            else:
-                yield p
-                old_p = p
     
 
 def main():
@@ -60,31 +36,35 @@ def main():
     problem = GrayScottProblem(settings['size'], \
                                coefficients=settings['coefficients'])
     
-    # create and init visualizer
+    # create visualizer
     visualizer = Visualizer(problem.problem_size(), \
                             export=settings['export'], \
                             keepalive=settings['keepalive'], \
                             show=settings['show'])
-    visualizer.update(problem.v)
 
     # create step generator
-    step_generator = snapshot_generator(settings['timesteps'], \
-                                        settings['outputsteps'], mode='linear')
+    stop_point_generator = TimeStepper(settings['timesteps'], \
+                                       settings['outputsteps'], mode='linear')
 
     # evolution loop
-    next_step = next(step_generator)
-    for step in range(settings['timesteps']):
-        problem.evolve()
+    stop_point = next(stop_point_generator)
+    for step in range(settings['timesteps'] + 1):        
+        # print progress message
         progress = 100 * step / settings['timesteps']
-        print('{:.0f}% finished'.format(progress), end='\r')
-        if step == next_step:
+        print('{:3.0f}% finished'.format(progress), end='\r')
+
+        # trigger visualization
+        if step == stop_point:
             visualizer.update(problem.v)
             try:
-                next_step = next(step_generator)
+                stop_point = next(stop_point_generator)
             except StopIteration:
                 pass
+
+        # evolve problem
+        problem.evolve()
     else:
-        print('Evolution finished')
+        print('\nEvolution finished')
         visualizer.close()
 
 
