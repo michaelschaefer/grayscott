@@ -23,7 +23,7 @@ class Visualizer(object):
         }
         
         # create plot
-        figsize = tuple(max(200, s) for s in size)
+        figsize = tuple(max(200, s) / self.settings['dpi'] for s in size)
         fig = plt.figure(figsize=figsize, dpi=self.settings['dpi'], \
                          facecolor=self.settings['facecolor'])
         fig.add_axes([0, 0, 1, 1], frameon=False)
@@ -64,8 +64,7 @@ class Visualizer(object):
         if self.export == True:
             filename = './temp/temp-{:05d}.png'.format(self.images_written)            
             self.images_written += 1
-            plt.savefig(filename, dpi=self.settings['dpi'])
-        
+            plt.savefig(filename, dpi=self.settings['dpi']) 
         
         
         
