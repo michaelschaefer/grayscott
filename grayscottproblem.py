@@ -20,13 +20,14 @@ class GrayScottProblem(object):
         0.08, 0.035, 0.06))
     '''
 
-    def __init__(self, n, coefficients=(0.16, 0.08, 0.035, 0.06)):
-        self.n = n
-        (self.Du, self.Dv, self.F, self.k) = coefficients
+    def __init__(self, size, coefficients):
+        self.size = size
+        Du, Dv, F, k = (coefficients[key] for key in ('Du', 'Dv', 'F', 'k'))
+        self.Du, self.Dv, self.F, self.k = Du, Dv, F, k
 
         # initialize system variables
-        self.u = np.zeros((self.n, self.n))
-        self.v = np.zeros((self.n, self.n))
+        self.u = np.zeros((self.size, self.size))
+        self.v = np.zeros((self.size, self.size))
         self._set_initial_values()
 
     def _laplacian(self, u):
@@ -48,8 +49,9 @@ class GrayScottProblem(object):
         self.v[...] = 0.0
 
         # set rectangular disturbances
-        self.u[self.n//2-r:self.n//2+r, self.n//2-r:self.n//2+r] = 0.5
-        self.v[self.n//2-r:self.n//2+r, self.n//2-r:self.n//2+r] = 0.25
+        a, b = self.size // 2 - r, self.size // 2 + r
+        self.u[a:b, a:b] = 0.5
+        self.v[a:b, a:b] = 0.25
 
         # add random noise
         self.u += noise * np.random.random(self.u.shape)
@@ -63,4 +65,4 @@ class GrayScottProblem(object):
         self.v += self.Dv * Lv + uvv - (self.F + self.k) * self.v
 
     def problem_size(self):
-        return (self.n, self.n)
+        return (self.size, self.size)

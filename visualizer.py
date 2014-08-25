@@ -8,16 +8,24 @@ import numpy as np
 class Visualizer(object):
     '''Framework to plot, update and export time-dependent image data'''
     
-    def __init__(self, size, dpi=72.0, export=False, keep_alive=True, show=True):
-        self.dpi = dpi
+    def __init__(self, size, export=False, keepalive=True, show=True):
         self.export = export
         self.images_written = 0
-        self.keep_alive = keep_alive
+        self.keepalive = keepalive        
         self.show = show
+
+        # additional (fixed) default
+        self.settings = {
+            'colormap': plt.cm.RdBu_r,
+            'dpi': 72,
+            'facecolor': 'white',
+            'interpolation': 'bicubic'
+        }
         
         # create plot
         figsize = tuple(max(200, s) for s in size)
-        fig = plt.figure(figsize=figsize, dpi=self.dpi, facecolor='white')
+        fig = plt.figure(figsize=figsize, dpi=self.settings['dpi'], \
+                         facecolor=self.settings['facecolor'])
         fig.add_axes([0, 0, 1, 1], frameon=False)
 
         # make plot interactive
@@ -32,17 +40,17 @@ class Visualizer(object):
         # close interactive mode
         if self.show == True:
             plt.ioff()
+            # keep last image on screen
+            if self.keepalive == True:
+                plt.show()
 
-        # keep last image on screen
-        if self.keep_alive == True:
-            plt.show()
-
-    def update(self, data, cmap=plt.cm.RdBu_r, interpolation='bicubic'):
+    def update(self, data):
         # check if image exists
         axesImage = plt.gci()
         if axesImage is None:
             # create image
-            axesImage = plt.imshow(data, cmap=cmap, interpolation=interpolation)
+            axesImage = plt.imshow(data, cmap=self.settings['colormap'], \
+                                   interpolation=self.settings['interpolation'])
             
         # set new data
         axesImage.set_data(data)
@@ -56,7 +64,7 @@ class Visualizer(object):
         if self.export == True:
             filename = './temp/temp-{:05d}.png'.format(self.images_written)            
             self.images_written += 1
-            plt.savefig(filename, dpi=self.dpi)
+            plt.savefig(filename, dpi=self.settings['dpi'])
         
         
         
