@@ -56,7 +56,7 @@ class CommandLineParser(object):
         u and v, namely
         
             ∂u/∂t = Du·∇²u - u·v² + F·(1 - u),
-            ∂v/∂t = Dv·∇²v + u·v² + (F + k)·v,      
+            ∂v/∂t = Dv·∇²v + u·v² - (F + k)·v,      
         
         and is equipped with periodic boundary conditions and specially chosen 
         initial values.

@@ -14,7 +14,7 @@ class Visualizer(object):
         self.keepalive = keepalive        
         self.show = show
 
-        # additional (fixed) default
+        # additional (fixed) defaults
         self.settings = {
             'colormap': plt.cm.RdBu_r,
             'dpi': 72,
