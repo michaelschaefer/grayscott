@@ -2,6 +2,9 @@
 #include <iostream>
 #include <stdio.h>
 
+#include "exporter.hh"
+#include "squarematrix.hh"
+
 
 using namespace std;
 
@@ -159,9 +162,16 @@ void solve(double F, double k) {
     evolve(u, v, F, k);
   }
 
+  /*
+    char buffer[50];
+    sprintf(buffer, "./study/F%03d-k%03d.pgm", int(1000*F), int(1000*k));  
+    export_data(v, buffer);
+  */
+
+  SquareMatrix V = SquareMatrix(N, v);
   char buffer[50];
-  sprintf(buffer, "./study/F%03d-k%03d.pgm", int(1000*F), int(1000*k));
-  export_data(v, buffer);
+  sprintf(buffer, "./study/F%03d-k%03d.pgm", int(1000*F), int(1000*k));  
+  Exporter::write_image(V, buffer);
 
   printf("Parameter F=%03d, k=%03d finished\n", int(1000*F), int(1000*k));
 }
@@ -176,5 +186,6 @@ int main() {
       solve(F / 1000, k / 1000);
     }
   }
+
   return 0;
 }
