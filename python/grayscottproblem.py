@@ -43,7 +43,7 @@ class GrayScottProblem(object):
         Lu[1:-1, 1:-1] = u[0:-2, 1:-1] + u[2:, 1:-1] + u[1:-1, 0:-2] + u[1:-1,2:]
         return Lu - 4*u
 
-    def _set_initial_values(self, r=20, noise=0.01):        
+    def _set_initial_values(self, r=20, noise=0):        
         # set basic level: u=1, v=0
         self.u[...] = 1.0
         self.v[...] = 0.0

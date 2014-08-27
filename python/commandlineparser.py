@@ -24,6 +24,30 @@ class CommandLineParser(object):
     }
 
     @staticmethod
+    def _parse_file(filename, settings):
+        with open(filename, 'r') as file:
+            for line in file:
+                key, value = line.split('=', 1)
+                if key == 'configfile':
+                    print('Warning: Ignoring configfile option (not allowed on a config file)')
+                    continue
+                CommandLineParser._parse_option(key, value, settings)
+                
+
+    @staticmethod
+    def _parse_option(key, value, settings):
+        if key in ('Du', 'Dv', 'F', 'k'):
+            settings['coefficients'][key] = float(value)
+        elif key == 'coefficients':                    
+            settings['coefficients'] = predefined_coefficients[value]            
+        elif key in ('outputsteps', 'size', 'timesteps'):
+            settings[key] = int(value)
+        elif key in ('export', 'keepalive', 'show'):
+            settings[key] = True if value.lower() == 'yes' else False
+        else:
+            raise ValueError                
+
+    @staticmethod
     def parse(arguments):
         settings = CommandLineParser.defaultsettings.copy()
         try:
@@ -32,16 +56,10 @@ class CommandLineParser(object):
                     CommandLineParser.usage()
                     return None
                 key, value = option.split('=', 1)
-                if key in ('Du', 'Dv', 'F', 'k'):
-                    settings['coefficients'][key] = float(value)
-                elif key == 'coefficients':                    
-                    settings['coefficients'] = predefined_coefficients[value]
-                elif key in ('outputsteps', 'size', 'timesteps'):
-                    settings[key] = int(value)
-                elif key in ('export', 'keepalive', 'show'):
-                    settings[key] = True if value.lower() == 'yes' else False
+                if key == 'configfile':
+                    CommandLineParser._parse_file(value, settings)
                 else:
-                    raise ValueError                
+                    CommandLineParser._parse_option(key, value, settings)                
         except:
             print('invalid syntax')
             CommandLineParser.usage()
@@ -66,9 +84,13 @@ class CommandLineParser(object):
         Options are specified in the form key=value.
         The following options are available:
     
-        coefficients=<value> (default: zebra)
-            use the predefined coefficient setting <value> (available settings
+        coefficients=<setting> (default: zebra)
+            use the predefined coefficient setting <setting> (available settings
             are: bacteria1, unstable, zebra)
+        configfile=<filename>
+            read options from configuration file <filename>. The format used for
+            config files is the same as for the command line arguments, that is
+            <key>=<value>, where one pair per line is allowed.
         Du=<value> (default: 0.16)
             set the diffusion coeffient for system variable u to <value>
         Dv=<value> (default: 0.08)
@@ -91,10 +113,9 @@ class CommandLineParser(object):
         size=<value> (default: 256)
             set the grid size to <value>
         timesteps=<value> (default: 10000)
-            set the number of timesteps to calculate to <value>            
-        
+            set the number of timesteps to calculate to <value>                    
 
-        The order of parameters Du, Dv, F, k and coefficients is important: 
-        Specifying one of Du, Dv, F, k after placing the coefficients option
-        will overwrite the corresponding value.
-    ''')
+        Parameters will be parsed in order of appearence, thus giving e.g. 
+        F=0.02 after coefficients=zebra will overwrite the feed rate of the
+        zebra setting with 0.02 and vice versa.
+        ''')
