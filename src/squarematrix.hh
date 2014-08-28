@@ -9,6 +9,12 @@ using namespace std;
 typedef unsigned int uint;
 
 
+/*
+  SquareMatrix represents a quadratic matrix. Element access is provided through
+  the () operator and is implemented periodically, that is indices bigger that the 
+  actual size of even negative ones are allowed (e.g. A(-1,0) == A(N-1,0) if N is
+  the size of the matrix).
+ */
 class SquareMatrix {
 
 public:
@@ -58,7 +64,7 @@ public:
   /*
     return data array
    */
-  double** data() { return m_data; }
+  inline double** data() { return m_data; }
 
   /*
     find maximum value
@@ -68,7 +74,7 @@ public:
 
     for (uint i = 0; i < m_size; ++i) {
       for (uint j = 0; j < m_size; ++j) {
-	if (m_data[i][j] < max) {
+	if (m_data[i][j] > max) {
 	  max = m_data[i][j];
 	}
       }
@@ -81,13 +87,33 @@ public:
     element access
   */
   double& operator() (int i, int j) {    
+    /*
     if (i < 0 || i >= m_size) {
-      i = rearrange_index(i);
+      //i = rearrange_index(i);
+      while (i < 0)
+	i += m_size;
+      while (i >= m_size)
+	i -= m_size;
     }
 
     if (j < 0 || j >= m_size) {
-      j = rearrange_index(j);
-    }
+      //j = rearrange_index(j);
+      while (j < 0)
+	j += m_size;
+      while (j >= m_size)
+	j -= m_size;
+      }
+    */
+
+    if (i == -1)
+      i += m_size;
+    else if (i == m_size)
+      i -= m_size;
+	
+    if (j == -1)
+      j = m_size - 1;
+    else if (j == m_size)
+    j = 0;
 
     return m_data[i][j];
   }
@@ -95,7 +121,7 @@ public:
   /*
     return matrix dimension
   */
-  int size() const { return m_size; }
+  inline int size() const { return m_size; }
 
 private:
 
