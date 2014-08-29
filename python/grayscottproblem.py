@@ -43,15 +43,15 @@ class GrayScottProblem(object):
         Lu[1:-1, 1:-1] = u[0:-2, 1:-1] + u[2:, 1:-1] + u[1:-1, 0:-2] + u[1:-1,2:]
         return Lu - 4*u
 
-    def _set_initial_values(self, r=20, noise=0):        
+    def _set_initial_values(self, r=20, noise=0.01):
         # set basic level: u=1, v=0
         self.u[...] = 1.0
         self.v[...] = 0.0
 
         # set rectangular disturbances
         a, b = self.size // 2 - r, self.size // 2 + r
-        self.u[a:b, a:b] = 0.5
-        self.v[a:b, a:b] = 0.25
+        self.u[a:b, a:b] = 0.5;
+        self.v[a:b, a:b] = 0.25;
 
         # add random noise
         self.u += noise * np.random.random(self.u.shape)

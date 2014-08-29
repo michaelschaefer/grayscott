@@ -20,37 +20,35 @@ import numpy as np
 import sys
 
 
-from commandlineparser import CommandLineParser
+from commandlineparser import *
 from grayscottproblem import GrayScottProblem
 from timestepper import TimeStepper
 from visualizer import Visualizer
     
 
 def main():
-    # parse options and get corresponding settings dictionary
-    settings = CommandLineParser.parse(sys.argv[1:])
-    if settings == None:
-        sys.exit(0)
+    # get settings from command line arguments
+    settings = argument_parser().parse_args()
+    settings.coefficients = predefined_coefficients[settings.coefficients]
         
     # create problem
-    problem = GrayScottProblem(settings['size'], \
-                               coefficients=settings['coefficients'])
+    problem = GrayScottProblem(settings.size, coefficients=settings.coefficients)
     
     # create visualizer
     visualizer = Visualizer(problem.problem_size(), \
-                            export=settings['export'], \
-                            keepalive=settings['keepalive'], \
-                            show=settings['show'])
+                            export=settings.export, \
+                            keepalive=settings.keepalive, \
+                            show=(not settings.noshow))
 
     # create step generator
-    stop_point_generator = TimeStepper(settings['timesteps'], \
-                                       settings['outputsteps'], mode='linear')
+    stop_point_generator = TimeStepper(settings.timesteps, \
+                                       settings.outputs, mode='linear')
 
     # evolution loop
     stop_point = next(stop_point_generator)
-    for step in range(settings['timesteps'] + 1):        
+    for step in range(settings.timesteps + 1):        
         # print progress message
-        progress = 100 * step / settings['timesteps']
+        progress = 100 * step / settings.timesteps
         print('{:3.0f}% finished'.format(progress), end='\r')
 
         # trigger visualization
