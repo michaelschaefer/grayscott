@@ -22,7 +22,7 @@ def main():
     N = int(argv[7])
     T = int(argv[8])
 
-    pool = Pool(processes=cpu_count)
+    pool = Pool(processes=cpu_count())
     
     params = []
     for F in linspace(aF, bF, nF, endpoint=True):
