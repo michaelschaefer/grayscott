@@ -13,14 +13,14 @@ def simulate(params):
 
 
 def main():
-    aF = double(argv[1])
-    bF = double(argv[2])
-    nF = double(argv[3])
-    ak = double(argv[4])
-    bk = double(argv[5])
-    nk = double(argv[6])
-    N = double(argv[7])
-    T = double(argv[8])
+    aF = float(argv[1])
+    bF = float(argv[2])
+    nF = int(argv[3])
+    ak = float(argv[4])
+    bk = float(argv[5])
+    nk = int(argv[6])
+    N = int(argv[7])
+    T = int(argv[8])
 
     pool = Pool(processes=cpu_count)
     
