@@ -53,6 +53,7 @@ public:
 
   Colormap(Color start=Color(0,0,0), Color mid=Color(127,127,127), 
 	   Color end=Color(255,255,255), double min=0.0, double max=1.0) {
+    m_end = end;
     m_mid = mid;
     m_start = start;
 
@@ -69,8 +70,14 @@ public:
   Color map(double intensity) {
     Color color;
     double x = (intensity - m_min) / m_delta;
+
+    if (x < 0.0) {
+      return m_start;
+    } else if (x > 1.0) {
+      return m_end;
+    }
     
-    if (x <= 0.5) {
+    if (x < 0.5) {
       for (uint i = 0; i < 3; ++i) {
 	color[i] = m_start[i] + 2 * x * m_dmid[i];
       }
@@ -91,6 +98,7 @@ public:
 
 private:
 
+  Color m_end;
   Color m_mid;
   Color m_start;
 
@@ -113,7 +121,7 @@ class ColormapBlueRed : public Colormap {
 public:    
   
   ColormapBlueRed(double min=0.0, double max=1.0) 
-    : Colormap(Color(5,48,97), Color(246,246,246), Color(103,0,31), min, max) {}
+    : Colormap(Color(5,48,97), Color(246,246,246), Color(186,61,62), min, max) {}
 
 };
 

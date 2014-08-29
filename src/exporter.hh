@@ -64,7 +64,7 @@ private:
 /*
   Initialization of static members of Exporter
  */
-bool Exporter::m_rescale = true;
+bool Exporter::m_rescale = false;
 Colormap Exporter::m_colormap = ColormapBlueRed();
 
 

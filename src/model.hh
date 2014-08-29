@@ -31,7 +31,7 @@ class GrayScottModel {
 public:
 
   GrayScottModel() {
-    m_N = GrayScottModelParameters::N();
+    m_N = GrayScottModelParameters::N;
     
     m_Lu = new double*[m_N];
     m_Lv = new double*[m_N];
@@ -78,10 +78,10 @@ public:
 	v = m_v[i][j];
 	uvv = u * v * v;	
 	
-	m_u[i][j] += GrayScottModelParameters::Du() * Lu - uvv + 
-	  GrayScottModelParameters::F() * (1 - u);
-	m_v[i][j] += GrayScottModelParameters::Dv() * Lv + uvv -
-	  (GrayScottModelParameters::F() + GrayScottModelParameters::k()) * v;
+	m_u[i][j] += GrayScottModelParameters::Du * Lu - uvv + 
+	  GrayScottModelParameters::F * (1 - u);
+	m_v[i][j] += GrayScottModelParameters::Dv * Lv + uvv -
+	  (GrayScottModelParameters::F + GrayScottModelParameters::k) * v;
       }
     }
   }
