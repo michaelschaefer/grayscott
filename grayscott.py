@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from numpy import linspace
 from os import system
 from sys import argv
@@ -13,18 +13,16 @@ def simulate(params):
 
 
 def main():
-    N = 128
-    T = 10000
+    aF, bF, nF, ak, bk, nk, N, T = argv[1:]
 
-    workers = int(argv[1])
-    pool = Pool(processes=workers)
+    pool = Pool(processes=cpu_count)
     
     params = []
-    for F in linspace(0, 0.1, 11, endpoint=True):
-        for k in linspace(0, 0.1, 11, endpoint=True):
+    for F in linspace(aF, bF, nF, endpoint=True):
+        for k in linspace(ak, bk, nk, endpoint=True):
             params.append((F, k, N, T))
 
-    pool.map(simulate, params, chunksize=workers)
+    pool.map_async(simulate, params)
     pool.close()
     pool.join()
 
