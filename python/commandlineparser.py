@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-import argparse
+from argparse import ArgumentParser
 
 
 predefined_coefficients = {
@@ -14,7 +14,7 @@ predefined_coefficients = {
 options = {
     '-coefficients': {
         'choices': sorted([key for key in predefined_coefficients]),
-        'default': 'zebra',
+        'default': None,
         'help': 'predefined coefficient setting to be used',
         'metavar': '<string>',
         'type': str
@@ -49,7 +49,7 @@ options = {
     },
 
     '-k': {
-        'default': 0.035,
+        'default': 0.06,
         'help': 'rate constant for species v',
         'metavar': '<float>',
         'type': float
@@ -82,7 +82,7 @@ options = {
     },
 
     '-timesteps': {
-        'default': 1000,
+        'default': 10000,
         'help': 'number of timestep to evolve the model',
         'metavar': '<int>',
         'type': int
@@ -97,10 +97,49 @@ options = {
 }
 
 
-def argument_parser():
-    parser = argparse.ArgumentParser()
+class CommandLineParser(ArgumentParser):
+    '''Handler for arguments given to the command line, derived from
+    ArgumentParser
 
-    for key in options:        
-        parser.add_argument(key, **options[key])
+    The __init__ method is overwritten to include the options given in the 
+    upper options dictionary.
+    '''
+    
+    def __init__(self):
+        description = '''
+        This Python program simulates the Gray-Scott model for pattern 
+        formation. The model consists of two nonlinear, coupled partial
+        differerntial equations for the chemical species u and v, namely
+        
+            ∂u/∂t = Du·∇²u - u·v² + F·(1 - u) and
+            ∂v/∂t = Dv·∇²v + u·v² - (F + k)·v,
+        
+        together with periodic boundary conditions and some initial values.
+        Du, Dv are diffusion coefficients, F is the feed rate and k the rate
+        constant of the second equation.
+        '''
+        epilog = '''
+        Note that a given '-coefficients <string>' will overwrite any values
+        given by -Du, -Dv, -F and -k.
+        '''
 
-    return parser
+        ArgumentParser.__init__(self, description=description, epilog=epilog)
+        for key in options:
+            self.add_argument(key, **options[key])
+
+    def parse_args(self):
+        settings = ArgumentParser.parse_args(self)
+        if settings.coefficients is None:
+            # no -coefficients <string> specified, so use other parameters
+            coeffs = {
+                'Du': settings.Du,
+                'Dv': settings.Dv,
+                'F': settings.F,
+                'k': settings.k
+            }
+            settings.coefficients = coeffs
+        else:
+            # use given coefficients setting instead of -Du etc.
+            coeffs = predefined_coefficients[settings.coefficients]
+            settings.coefficients = coeffs
+        return settings

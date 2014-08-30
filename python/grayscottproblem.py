@@ -16,8 +16,7 @@ class GrayScottProblem(object):
         Number of spacial point in each direction
     coefficients : tuple
         A tuple of four values specifying the diffusion for the two species, the
-        feed rate and the rate constant of the second equation (default: (0.16, 
-        0.08, 0.035, 0.06))
+        feed rate and the rate constant of the second equation
     '''
 
     def __init__(self, size, coefficients):
