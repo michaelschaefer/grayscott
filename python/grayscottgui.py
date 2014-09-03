@@ -2,85 +2,70 @@
 # -*- coding: utf-8 -*-
 
 
+import gui
 from grayscottproblem import GrayScottProblem
+import numpy as np
 from PySide import QtCore, QtGui
 import sys
 
 
 class GrayScottGui(QtGui.QMainWindow):
-    def __init__(self):
+    def __init__(self, title='Gray-Scott model GUI'):
         super(GrayScottGui, self).__init__()
-        self.setWindowTitle('Gray-Scott model Gui')
-        self.panel = Panel(self)
-        self.setCentralWidget(self.panel)
+        self.title = title
+        self.setWindowTitle(self.title)
 
-
-class Panel(QtGui.QWidget):
-    def __init__(self, parent):
-        super(Panel, self).__init__(parent)
-
-        self.param_panel = ParameterWidget(self)
-        self.vis_panel = VisualizationWidget(self)
+        self.parameterbox = gui.ParameterBox(self)                            
+        self.simulationviewer = gui.SimulationViewer(self, 256)
         
-        box = QtGui.QVBoxLayout()
-        box.addWidget(self.param_panel)
-        box.addWidget(self.vis_panel)
-        self.setLayout(box)
-
-
-class ParameterWidget(QtGui.QWidget):
-    def __init__(self, parent):
-        super(ParameterWidget, self).__init__(parent)
+        self.buttonbox = gui.ButtonBox(self)
+        self.buttonbox.pause.connect(self._simulation_pause)
+        self.buttonbox.resume.connect(self._simulation_resume)
+        self.buttonbox.start.connect(self._simulation_start)
+        self.buttonbox.stop.connect(self._simulation_interrupt)
         
         box = QtGui.QGridLayout()
+        box.addWidget(self.parameterbox, 0, 0)
+        box.addWidget(self.buttonbox, 1, 0)
+        box.addWidget(self.simulationviewer, 0, 1, 2, 1, alignment=QtCore.Qt.AlignmentFlag.AlignVCenter)
 
-        self.sliders = [Slider(self, 'F'), Slider(self, 'k')]
-        for i in xrange(len(self.sliders)):
-            box.addWidget(self.sliders[i], i, 0)
+        panel = QtGui.QWidget(self)
+        panel.setLayout(box)
 
-        self.button_simulate = QtGui.QPushButton('simulate')
-        self.button_simulate.clicked.connect(self._simulate)        
-        box.addWidget(self.button_simulate, len(self.sliders), 0)
-
-        self.setLayout(box)
-
-    def _simulate(self):
-        F = self.sliders[0].value() / 1000.0
-        k = self.sliders[1].value() / 1000.0
-        problem = GrayScottProblem(128, { 'Du': 0.16, 'Dv': 0.08, 'F': F, 'k': k })
-        for step in xrange(100):
-            problem.evolve()
-        print('finished')
-
-
-class Slider(QtGui.QWidget):    
-    def __init__(self, parent, name):
-        super(Slider, self).__init__(parent)
-        self.name = name
+        self.setCentralWidget(panel)        
         
-        box = QtGui.QGridLayout()
-        self.label = QtGui.QLabel()
-        self.slide = QtGui.QSlider(QtCore.Qt.Orientation.Horizontal)
-        self.slide.valueChanged.connect(self._update_label)
-        self.slide.setMinimum(0)
-        self.slide.setMaximum(100)
-        self.slide.setSingleStep(1)
-        self.slide.setValue(35)        
-        box.addWidget(self.label, 0, 0)
-        box.addWidget(self.slide, 0, 1)
-        self.setLayout(box)
+        self.simulator = gui.Simulator()
+        self.simulator.done.connect(lambda: self._simulation_ended('simulation finished'))
+        self.simulator.interrupted.connect(lambda: self._simulation_ended('simulation interrupted'))        
+        self.simulator.update_image.connect(self.simulationviewer.update_image)
+        self.simulator.update_status.connect(self.simulationviewer.update_status)
+        
+    def closeEvent(self, event):
+        if self.simulator.isRunning() == True:
+            self.simulator.interrupt()
+            self.simulator.wait()                            
 
-    def value(self):
-        return self.slide.value()
+    def _simulation_ended(self, msg):                    
+        self.simulationviewer.update_status(msg)
+        self.buttonbox.toggle_buttons(gui.Mode.Start)
 
-    def _update_label(self, value):
-        self.label.setText('{} = {:.3f}'.format(self.name, value / 1000.0))
+    def _simulation_interrupt(self):
+        self.simulator.interrupt() 
+        
+    def _simulation_pause(self):
+        self.buttonbox.toggle_buttons(gui.Mode.Resume | gui.Mode.Stop)
+        self.simulator.pause()
+        
+    def _simulation_resume(self):
+        self.buttonbox.toggle_buttons(gui.Mode.Pause | gui.Mode.Stop)
+        self.simulator.resume()       
 
-
-class VisualizationWidget(QtGui.QWidget):
-    def __init__(self, parent):
-        super(VisualizationWidget, self).__init__(parent)
-
+    def _simulation_start(self):
+        self.buttonbox.toggle_buttons(gui.Mode.Pause | gui.Mode.Stop)
+        parameters = self.parameterbox.parameters()
+        self.simulator.set_parameters(parameters)                
+        self.simulator.start()
+        
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

@@ -1,3 +1,7 @@
+.idea
+.settings
+.project
+.pydevproject
 grayscott
 study
 temp
