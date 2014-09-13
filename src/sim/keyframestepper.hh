@@ -81,7 +81,6 @@ private:
     uint m_numberOfTimesteps;
     uint m_numberOfKeyframes;
     DistributionMode m_distributionMode;
-    //std::vector<uint> m_keyframes;
 
 };
 

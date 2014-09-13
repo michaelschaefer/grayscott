@@ -10,6 +10,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QGridLayout>
+#include "src/gui/aboutdialog.hh"
 #include "src/gui/buttonbox.hh"
 #include "src/gui/help.hh"
 #include "src/gui/parameterbox.hh"
@@ -111,6 +112,14 @@ private slots:
         }
     }
 
+    void showAbout(AboutDialog::Role role) {
+        AboutDialog* dialog = new AboutDialog(this, role);
+        dialog->exec();
+    }
+
+    inline void showAboutModel() { showAbout(AboutDialog::Model); }
+    inline void showAboutProgram() { showAbout(AboutDialog::Program); }
+
     void simulationDone() {
         m_simulationViewer->updateStatusLine("simulation finished");
         m_buttonBox->enableButton(Button::Start);
@@ -155,9 +164,13 @@ private:
         menu = new QMenu("Help");
 
         action = new QAction("About Model", this);
+        QObject::connect(action, SIGNAL(triggered()),
+                         this, SLOT(showAboutModel()));
         menu->addAction(action);
 
         action = new QAction("About Program", this);
+        QObject::connect(action, SIGNAL(triggered()),
+                         this, SLOT(showAboutProgram()));
         menu->addAction(action);
 
         action = new QAction("Version Information", this);
