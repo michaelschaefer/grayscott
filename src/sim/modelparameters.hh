@@ -3,6 +3,8 @@
 
 
 #include <iostream>
+#include <string>
+#include "src/sim/keyframestepper.hh"
 
 
 using namespace std;
@@ -25,27 +27,23 @@ class GrayScottModelParameters {
 
 public:
 
-  static bool export_to_file;
+    static void load(string filename);
+    static void save(string filename);
 
-  static double Du;
-  static double Dv;
-  static double F;
-  static double k;
 
-  static uint N;
+    static bool export_to_file;
+
+    static double Du;
+    static double Dv;
+    static double F;
+    static double k;
+
+    static KeyframeStepper::DistributionMode keyframeDistributionMode;
+
+    static uint keyframes;
+    static uint size;
+    static uint timesteps;
 
 };
-
-
-/*
-  Initialization of static members of GrayScottModelParameters
- */
-bool GrayScottModelParameters::export_to_file = true;
-double GrayScottModelParameters::Du = 0.16;
-double GrayScottModelParameters::Dv = 0.08;
-double GrayScottModelParameters::F = 0.035;
-double GrayScottModelParameters::k = 0.06;
-uint GrayScottModelParameters::N = 128;
-
 
 #endif // __MODEL_HH__

@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# -*- utf-8 -*-
+# -*- coding: utf-8 -*-
 
 
 '''
@@ -14,6 +14,10 @@ The numerics
     The system is discretized by finite differences on a regular 2d grid in space
     and by the explicit Euler method in time.
 '''
+
+
+# this is needed for the end command in 
+from __future__ import print_function
 
 
 import numpy as np

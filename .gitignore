@@ -1,11 +1,7 @@
-.idea
-.settings
-.project
-.pydevproject
-grayscott
-study
-temp
+material/
+python/temp/
+study/
 *.*~
+*.pro
+*.pro.user
 *.pyc
-*.pdf
-*~
