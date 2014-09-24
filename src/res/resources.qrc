@@ -3,6 +3,10 @@
         <file alias="logo">logo.png</file>
     </qresource>
     <qresource prefix="/translations">
-        <file>grayscott_de_DE.qm</file>
+        <file>grayscott_de.qm</file>
+    </qresource>
+    <qresource prefix="/html">
+        <file>model_en.html</file>
+        <file>program_en.html</file>
     </qresource>
 </RCC>

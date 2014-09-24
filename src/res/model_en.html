@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>About the Gray-Scott model</title>
+
+    <style>
+      body { background-color: none; line-height: 200%; margin: 1em; }
+      .formula { padding: 1em; text-align: center; }
+    </style>
+
+  </head>
+
+  <body>
+    
+    <h1>About the Gray-Scott model</h1>
+
+    The Gray-Scott model is a system of so called reaction diffusion equations
+    describing the behaviour of two chemical species. Although fairly simple,
+    the model is known for an astonishing variety of patterns.
+
+    <h2>Chemical basics</h2>
+
+    We consider two species U and V. These two species behave according to the
+    following reactions:
+
+    <div class="formula">
+      U + 2V → 3V <br/>
+      V → P
+    </div>
+
+    P is an inert product we are not further interested in. We assume that both
+    reactions are irreversible and that - in addition to the chemical reactions
+    - the species U and V are allowed to diffuse. Due to the irreversibility, U
+    will we consumed after some time and both reactions will stop. In order to
+    keep them alive, U has to be steadily refilled.
+
+
+    <h2>Mathematical modelling</h2>
+
+    We consider a two-dimensional domain with spacial variables x and y and a
+    temporal variable t. If we write the concentrations of U, V as u, v, the
+    reactions above can we written as a system of partial differential
+    equations:
+
+    <div class="formula">
+      ∂<sub>t</sub>u = Du·∇²u - u·v² + F·(1 - u) <br/>
+      ∂<sub>t</sub>v = Dv·∇²v + u·v² - (F + k)·v
+    </div>
+
+    Here, ∂<sub>t</sub> denotes the partial derivative after t, ∇² is the
+    Laplacian (the sum of the spacial second derivatives), Du and Dv are
+    diffusion constants, F is called feed rate and k denotes the reaction rate
+    of the second reaction relative to the first one. Let us give a short
+    characterization of the various terms in these two equations. 
+    <ul>
+      <li>
+	The terms on the left (the partial derivative after t) describe how the
+	concentrations u and v develop over time: they change according to the
+	right side.
+      </li>
+      <li>
+	The first terms on the right (the Laplacians) are <i>diffusion
+	terms</i> which model the effect of Brownian motion (that is, if you
+	give a drop of ink into a glas of water, diffusion makes it to spread
+	out into the entire glas over time).
+      </li>
+      <li>
+	The term u·v² is a so called <i>reaction term</i> which corresponds
+	directly to the first reaction equation (the exponent 2 is due to the
+	fact that we need one atom of U but two atoms of V for this
+	reaction). Since U is consumed and V is produced in this reaction, the
+	term occurs once with a negative and once with a positive sign.
+      </li>
+      <li>
+	The last term in the first equation is a <i>feed term</i>. It refreshes
+	the supply of U to keep the reactions alive. Note that this term is
+	proportional to (1-u), thus a small supply of U leads to a big
+	production and vice versa.
+      </li>
+      <li>
+	The last term in the second equation is a <i>consumption term</i>. The
+	first cause of the consumption is that the species V is drained off the
+	system with the same rate as U is produced. The second is that V reacts
+	to the inert product P with a rate k.
+      </li>
+    </ul>
+
+
+    <h2>Numerical simulation</h2>
+    
+    In order to numerically simulate the behaviour of the system we consider a
+    rectangular grid of N points in each direction (e.g., N=128 by default). The
+    numerical scheme consists in finding approximations of the concentrations u
+    and v at the discrete grid points and for a finite number of points in
+    time. The following discretization techniques are used: 
+    <ul>
+      <li>
+	Temporal derivatives are approximated by the explicit Euler scheme, that is
+	
+	<div class="formula">
+	  ∂<sub>t</sub>u(x,y,t) ≈ (u(x,y,t) - u(x,y,t-∆t)) / ∆t
+	</div>
+
+	for some <i>(temporal) step size</i> ∆t.
+      </li>
+      <li>
+	Spacial derivatives are approximated by finite differences. For the
+	whole Laplacian, this results in the famous 5-point stencil, that is
+	
+	<div class="formula">
+	  ∇²u(x,y,t) ≈ (1/∆h)² · (u(x-∆h,y,t) + u(x+∆h,y,t) + u(x,y-∆h,t) +
+	  u(x,y+∆h,t) - 4·u(x,y,t))
+	</div>
+	
+	for some <i>(spacial) step size</i> ∆h.
+      </li>
+    </ul>
+
+    Since the system is numerically very stable, we can choose both ∆h and ∆t
+    equal to 1. At last, we need to specify the initial state of the system,
+    since the equations are time-dependend. We use the following configuration:
+    
+    <ul>
+      <li>
+	The concentration of U is set to 1 except for a rectangular area in the
+	center of the grid, where we set it to 0.5 with a random disturbance of
+	±1%.
+      </li>
+      <li>
+	The concentration of V is set to 0 except for the same rectangular,
+	where it is set to 0.25 also with ±1% random disturbance.
+      </li>
+    </ul>
+
+    The random disturbances are in order to make the behaviour non-symmetric and
+    indeterministic, that is every simulation outcome is different.
+
+
+    <h2>Some notes about the parameters</h2>
+
+    <ul>
+      <li>
+	The absolute values of the diffusion coefficients Du and Dv are not that
+	important. In order to get non-trivial patterns we only need that
+	species U diffuses faster that V. In our case, we use the fixed values
+	Du=0.16 and Dv=0.08 (thus Du/Dv = 2).
+      </li>
+      <li>
+	Although in general, every non-negative values for F and k are allowed,
+	we restrict them to the interval [0, 0.1]. This is due to the fact that
+	outside of this parameter range only constant solutions can be observed
+	which we will not consider as interesting.
+      </li>
+    </ul>
+
+  </body>
+</html>

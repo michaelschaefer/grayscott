@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     // allow locale switch via command line for debug purpose
     QString locale;
     if (argc == 1) {
-        locale = QLocale::system().name();
+        locale = QLocale::system().name().mid(0, 2);
     } else {
         locale = QString(argv[1]);
     }

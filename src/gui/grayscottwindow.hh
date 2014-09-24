@@ -13,7 +13,6 @@
 #include <QVBoxLayout>
 #include "src/gui/aboutdialog.hh"
 #include "src/gui/buttonbox.hh"
-#include "src/gui/help.hh"
 #include "src/gui/parameterbox.hh"
 #include "src/gui/simulationviewer.hh"
 #include "src/gui/simulator.hh"
@@ -141,7 +140,13 @@ private slots:
     }
 
     void versionInformation() {
-        Help::showVersionInformation(this);
+        QMessageBox about(this);
+        about.setWindowTitle(Text::Help::versionInformationTitle());
+        about.setText(Text::Help::versionInformationText());
+        about.setDefaultButton(QMessageBox::Ok);
+        about.setIconPixmap(windowIcon().pixmap(128, 128));
+        about.show();
+        about.exec();
     }
 
 

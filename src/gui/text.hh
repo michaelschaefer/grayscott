@@ -30,6 +30,15 @@ static QString version() { return QWidget::trUtf8("1.0"); }
 }
 
 
+namespace About {
+
+static QString close() { return QWidget::trUtf8("close"); }
+static QString dataNotFound() { return QWidget::trUtf8("Data for neither system nor default language found!"); }
+static QString defaultLocaleText() { return QWidget::trUtf8("Data for system language not found! Default language will be loaded instead."); }
+
+}
+
+
 namespace Export {
 
 static QString directoryButton() { return QWidget::trUtf8("Choose directory"); }
