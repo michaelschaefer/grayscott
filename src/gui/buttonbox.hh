@@ -2,10 +2,11 @@
 #define __BUTTONBOX_HH__
 
 
-#include <map>
 #include <QHBoxLayout>
+#include <QMap>
 #include <QPushButton>
 #include <QWidget>
+#include "src/gui/text.hh"
 
 
 using namespace std;
@@ -34,22 +35,22 @@ public:
         : QWidget(parent)
     {
         QPushButton* button = new QPushButton(this);
-        button->setText("pause");
+        button->setText(Text::SimulationControl::pause());
         QObject::connect(button, SIGNAL(clicked()), this, SLOT(emitPauseClicked()));
         m_buttons["pause"] = button;
 
         button = new QPushButton(this);
-        button->setText("resume");
+        button->setText(Text::SimulationControl::resume());
         QObject::connect(button, SIGNAL(clicked()), this, SLOT(emitResumeClicked()));
         m_buttons["resume"] = button;
 
         button = new QPushButton(this);
-        button->setText("start");
+        button->setText(Text::SimulationControl::start());
         QObject::connect(button, SIGNAL(clicked()), this, SLOT(emitStartClicked()));
         m_buttons["start"] = button;
 
         button = new QPushButton(this);
-        button->setText("stop");
+        button->setText(Text::SimulationControl::stop());
         QObject::connect(button, SIGNAL(clicked()), this, SLOT(emitStopClicked()));
         m_buttons["stop"] = button;
 
@@ -81,7 +82,7 @@ private slots:
 
 private:
 
-    map<QString, QPushButton*> m_buttons;
+    QMap<QString, QPushButton*> m_buttons;
 
 };
 

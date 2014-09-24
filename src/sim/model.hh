@@ -4,8 +4,8 @@
 
 #include <chrono>
 #include <random>
-#include "modelparameters.hh"
-#include "squarematrix.hh"
+#include "src/sim/parameters.hh"
+#include "src/sim/squarematrix.hh"
 
 
 typedef unsigned int uint;
@@ -30,11 +30,11 @@ class GrayScottModel {
 
 public:
 
-    GrayScottModel(uint size=GrayScottModelParameters::size) {
-        m_Du = GrayScottModelParameters::Du;
-        m_Dv = GrayScottModelParameters::Dv;
-        m_F = GrayScottModelParameters::F;
-        m_k = GrayScottModelParameters::k;
+    GrayScottModel(uint size=Parameters::Model::size) {
+        m_Du = Parameters::Model::Du;
+        m_Dv = Parameters::Model::Dv;
+        m_F = Parameters::Model::F;
+        m_k = Parameters::Model::k;
         m_size = size;
 
         m_Lu = new double*[m_size];

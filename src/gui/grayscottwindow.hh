@@ -4,18 +4,21 @@
 #include <QtCore/Qt>
 #include <QAction>
 #include <QFileDialog>
+#include <QHBoxLayout>
 #include <QKeySequence>
 #include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QGridLayout>
+#include <QVBoxLayout>
 #include "src/gui/aboutdialog.hh"
 #include "src/gui/buttonbox.hh"
 #include "src/gui/help.hh"
 #include "src/gui/parameterbox.hh"
 #include "src/gui/simulationviewer.hh"
 #include "src/gui/simulator.hh"
+#include "src/gui/text.hh"
+#include "src/sim/parameters.hh"
 #include <iostream>
 
 
@@ -41,18 +44,22 @@ public:
         m_parameterBox = new ParameterBox(this);
         m_simulationViewer = new SimulationViewer(this);
 
-        QGridLayout* grid = new QGridLayout();
-        grid->addWidget(m_parameterBox, 0, 0);
-        grid->addWidget(m_buttonBox, 1, 0);
-        grid->addWidget(m_simulationViewer, 0, 1, 2, 1, Qt::AlignVCenter);
+        QVBoxLayout* rightLayout = new QVBoxLayout();
+        rightLayout->addWidget(m_buttonBox, 0, Qt::AlignVCenter);
+        rightLayout->addWidget(m_simulationViewer, 0, Qt::AlignVCenter);
+
+        QHBoxLayout* entireLayout = new QHBoxLayout();
+        entireLayout->addWidget(m_parameterBox);
+        entireLayout->addLayout(rightLayout);
 
         QWidget* panel = new QWidget(this);
-        panel->setLayout(grid);
+        panel->setLayout(entireLayout);
         setCentralWidget(panel);
 
         createMenu();
 
-        setWindowIcon(QIcon("~/development/grayscottgui/logo.png"));
+        m_icon = QIcon(":/images/logo");
+        setWindowIcon(m_icon);
 
 
         /*
@@ -64,10 +71,10 @@ public:
                          m_simulationViewer, SLOT(updateStatusLine(QString)));
         QObject::connect(m_simulator, SIGNAL(imageUpdateable(QImage, uint)),
                          m_simulationViewer, SLOT(updateImage(QImage, uint)));
-        QObject::connect(m_simulator, SIGNAL(done()),
-                         this, SLOT(simulationDone()));
-        QObject::connect(m_simulator, SIGNAL(terminated()),
-                         this, SLOT(simulationTerminated()));
+        QObject::connect(m_simulator, SIGNAL(stopped()),
+                         this, SLOT(simulationStopped()));
+        QObject::connect(m_simulator, SIGNAL(exportDone()),
+                         this, SLOT(simulationExportDone()));        
     }
 
 
@@ -84,22 +91,23 @@ private slots:
             m_simulator->resume();
         }
 
-        if (button & Button::Start) {
-            m_buttonBox->enableButton(Button::Pause | Button::Stop);
-            m_parameterBox->forwardParameters(m_simulationViewer);
-            m_simulator->start();
+        if (button & Button::Start) {            
+            if (m_parameterBox->saveParameters(m_simulationViewer) == true) {
+                m_buttonBox->enableButton(Button::Pause | Button::Stop);
+                m_simulator->start();
+            }
         }
 
         if (button & Button::Stop) {
             m_buttonBox->enableButton(Button::Start);
-            m_simulator->terminate();
+            m_simulator->stop();
         }
     }
 
     void open() {
         QString filename = QFileDialog::getOpenFileName(this);
         if (filename.isNull() == false) {
-            GrayScottModelParameters::load(filename.toStdString());
+            Parameters::load(filename.toStdString());
             m_parameterBox->loadParameters();
         }
     }
@@ -107,8 +115,8 @@ private slots:
     void saveAs() {
         QString filename = QFileDialog::getSaveFileName(this);
         if (filename.isNull() == false) {
-            m_parameterBox->forwardParameters();
-            GrayScottModelParameters::save(filename.toStdString());
+            m_parameterBox->saveParameters();
+            Parameters::save(filename.toStdString());
         }
     }
 
@@ -118,15 +126,17 @@ private slots:
     }
 
     inline void showAboutModel() { showAbout(AboutDialog::Model); }
-    inline void showAboutProgram() { showAbout(AboutDialog::Program); }
+    inline void showAboutProgram() { showAbout(AboutDialog::Program); }    
 
-    void simulationDone() {
-        m_simulationViewer->updateStatusLine("simulation finished");
-        m_buttonBox->enableButton(Button::Start);
+    void simulationExportDone() {
+        m_simulator->pause();
+        m_simulationViewer->disableExportToFile();
+        QMessageBox::information(this, Text::Application::name(), Text::SimulationViewer::exportDoneText());
+        m_simulator->resume();
     }
 
-    void simulationTerminated() {
-        m_simulationViewer->updateStatusLine("simulation terminated");
+    void simulationStopped() {
+        m_simulationViewer->updateStatusLine(Text::SimulationViewer::simulationStopped());
         m_buttonBox->enableButton(Button::Start);
     }
 
@@ -141,39 +151,49 @@ private:
         QAction* action = 0;
         QMenu* menu = 0;
 
-        menu = new QMenu("&File");
 
-        action = new QAction("&Open Configuration...", this);
-        action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+        /*
+         * file menu
+         */
+
+        menu = new QMenu(Text::MenuBar::menuFile());
+
+        action = new QAction(Text::MenuBar::actionOpen(), this);
+        action->setShortcut(Qt::CTRL + Qt::Key_O);
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(open()));
         menu->addAction(action);
 
-        action = new QAction("&Save Configuration As...", this);
-        action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+        action = new QAction(Text::MenuBar::actionSaveAs(), this);
+        action->setShortcut(Qt::CTRL + Qt::Key_S);
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(saveAs()));
         menu->addAction(action);
 
-        action = new QAction("&Quit", this);
-        action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
+        action = new QAction(Text::MenuBar::actionQuit(), this);
+        action->setShortcut(Qt::CTRL + Qt::Key_Q);
         QObject::connect(action, SIGNAL(triggered()), this, SLOT(close()));
         menu->addSeparator();
         menu->addAction(action);
 
         menuBar()->addMenu(menu);
 
-        menu = new QMenu("Help");
 
-        action = new QAction("About Model", this);
+        /*
+         * help menu
+         */
+
+        menu = new QMenu(Text::MenuBar::menuHelp());
+
+        action = new QAction(Text::MenuBar::actionAboutModel(), this);
         QObject::connect(action, SIGNAL(triggered()),
                          this, SLOT(showAboutModel()));
         menu->addAction(action);
 
-        action = new QAction("About Program", this);
+        action = new QAction(Text::MenuBar::actionAboutProgram(), this);
         QObject::connect(action, SIGNAL(triggered()),
                          this, SLOT(showAboutProgram()));
         menu->addAction(action);
 
-        action = new QAction("Version Information", this);
+        action = new QAction(Text::MenuBar::actionVersionInformation(), this);
         QObject::connect(action, SIGNAL(triggered()),
                          this, SLOT(versionInformation()));
         menu->addSeparator();
@@ -183,6 +203,7 @@ private:
     }    
 
     ButtonBox* m_buttonBox;
+    QIcon m_icon;
     ParameterBox* m_parameterBox;
     SimulationViewer* m_simulationViewer;
     Simulator* m_simulator;

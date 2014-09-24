@@ -10,11 +10,11 @@
 #include <QRadioButton>
 #include <QVBoxLayout>
 #include <QWidget>
-#include "src/gui/distributionmodewidget.hh"
 #include "src/gui/exportwidget.hh"
 #include "src/gui/parameterslider.hh"
 #include "src/gui/simulationviewer.hh"
-#include "src/sim/modelparameters.hh"
+#include "src/gui/text.hh"
+#include "src/sim/parameters.hh"
 
 
 using namespace std;
@@ -45,23 +45,39 @@ public:
         slider->setValue(0.06);
         m_sliders["k"] = slider;
 
-        slider = new ParameterSlider(this, "timesteps");
-        slider->setFormat("%.0f");
-        slider->setRange(0, 500000, 1000);
-        slider->setValue(10000);
-        m_sliders["timesteps"] = slider;
-
-        slider = new ParameterSlider(this, "keyframes");
-        slider->setFormat("%.0f");
-        slider->setRange(1, 1000, 1);
-        slider->setValue(10);
-        m_sliders["keyframes"] = slider;
-
-        slider = new ParameterSlider(this, "size");
+        slider = new ParameterSlider(this, Text::ParameterBox::System::size());
         slider->setFormat("%.0f");
         slider->setRange(32, 512, 32);
         slider->setValue(128);
         m_sliders["size"] = slider;
+
+
+        /*
+         * speedup group box
+         */
+
+        m_speedup = new QButtonGroup(this);
+        QGroupBox* speedupGroupBox = new QGroupBox(Text::ParameterBox::Rendering::groupSpeedTitle());
+        QHBoxLayout* speedupBoxLayout = new QHBoxLayout();
+
+        QRadioButton* rb = new QRadioButton(Text::ParameterBox::Rendering::slow());
+        m_speedup->addButton(rb, 100);
+        speedupBoxLayout->addWidget(rb);
+
+        rb = new QRadioButton(Text::ParameterBox::Rendering::normal());
+        rb->setChecked(true);
+        m_speedup->addButton(rb, 10);
+        speedupBoxLayout->addWidget(rb);
+
+        rb = new QRadioButton(Text::ParameterBox::Rendering::fast());
+        m_speedup->addButton(rb, 1);
+        speedupBoxLayout->addWidget(rb);
+
+        rb = new QRadioButton(Text::ParameterBox::Rendering::veryFast());
+        m_speedup->addButton(rb, 0);
+        speedupBoxLayout->addWidget(rb);
+
+        speedupGroupBox->setLayout(speedupBoxLayout);
 
 
         /*
@@ -70,10 +86,10 @@ public:
 
         m_defaults = new QComboBox(this);
         m_defaults->setEditable(false);
-        m_defaults->addItem("<user-defined>");
-        m_defaults->addItem("bacteria1");
-        m_defaults->addItem("unstable");
-        m_defaults->addItem("zebra");
+        m_defaults->addItem(Text::ParameterBox::System::userDefined());
+        m_defaults->addItem(Text::ParameterBox::System::bacteria1());
+        m_defaults->addItem(Text::ParameterBox::System::unstable());
+        m_defaults->addItem(Text::ParameterBox::System::zebra());
 
         QObject::connect(m_defaults, SIGNAL(activated(int)),
                          this, SLOT(load_defaults(int)));
@@ -82,16 +98,9 @@ public:
         QObject::connect(m_sliders["F"], SIGNAL(valueChanged()),
                 this, SLOT(load_defaults()));
         QObject::connect(m_sliders["k"], SIGNAL(valueChanged()),
-                this, SLOT(load_defaults()));
+                this, SLOT(load_defaults()));        
 
-        m_defaults->setCurrentIndex(1);
-
-
-        /*
-         * Radio buttons for keyframe distribution
-         */
-
-        m_distributionMode = new DistributionModeWidget(this);
+        m_defaults->setCurrentIndex(1);                       
 
 
         /*
@@ -108,45 +117,43 @@ public:
 
         QVBoxLayout* mainBox = new QVBoxLayout();
 
-        QGroupBox* groupBox = new QGroupBox("System parameters");
+        QGroupBox* groupBox = new QGroupBox(Text::ParameterBox::System::groupTitle());
         QVBoxLayout* box = new QVBoxLayout();
         box->addWidget(m_defaults);
         box->addWidget(m_sliders["F"]);
         box->addWidget(m_sliders["k"]);
-        groupBox->setLayout(box);
-        mainBox->addWidget(groupBox);
-
-        groupBox = new QGroupBox("Visualization parameters");
-        box = new QVBoxLayout();
-        box->addWidget(m_sliders["timesteps"]);
-        box->addWidget(m_sliders["keyframes"]);
         box->addWidget(m_sliders["size"]);
-        box->addWidget(m_distributionMode);
-
         groupBox->setLayout(box);
         mainBox->addWidget(groupBox);
 
-        mainBox->addWidget(m_export);
+        groupBox = new QGroupBox(Text::ParameterBox::Rendering::groupTitle());
+        box = new QVBoxLayout();        
+        box->addWidget(speedupGroupBox);
+        box->addWidget(m_export);
+
+        groupBox->setLayout(box);
+        mainBox->addWidget(groupBox);
 
         setLayout(mainBox);
-    }
+    }    
 
     void loadParameters() {
-        m_sliders["F"]->setValue(GrayScottModelParameters::F);
-        m_sliders["k"]->setValue(GrayScottModelParameters::k);
-        m_sliders["keyframes"]->setValue(GrayScottModelParameters::keyframes);
-        m_sliders["size"]->setValue(GrayScottModelParameters::size);
-        m_sliders["timesteps"]->setValue(GrayScottModelParameters::timesteps);
-        m_distributionMode->setMode(GrayScottModelParameters::keyframeDistributionMode);
+        m_sliders["F"]->setValue(Parameters::Model::F);
+        m_sliders["k"]->setValue(Parameters::Model::k);
+        m_sliders["size"]->setValue(Parameters::Model::size);
+        m_speedup->button(Parameters::Model::speedup)->setChecked(true);
+        m_export->loadParameters();
     }
 
-    void forwardParameters(SimulationViewer* simViewer=0) {
-        GrayScottModelParameters::F = m_sliders["F"]->value();
-        GrayScottModelParameters::k = m_sliders["k"]->value();
-        GrayScottModelParameters::keyframes = m_sliders["keyframes"]->value();
-        GrayScottModelParameters::size = m_sliders["size"]->value();
-        GrayScottModelParameters::timesteps = m_sliders["timesteps"]->value();        
-        GrayScottModelParameters::keyframeDistributionMode = m_distributionMode->mode();
+    bool saveParameters(SimulationViewer* simViewer=0) {
+        if (m_export->saveParameters() == false) {
+            return false;
+        }
+
+        Parameters::Model::F = m_sliders["F"]->value();
+        Parameters::Model::k = m_sliders["k"]->value();
+        Parameters::Model::size = m_sliders["size"]->value();
+        Parameters::Model::speedup = m_speedup->checkedId();
 
         if (simViewer != 0) {
             if (m_export->isChecked() == true) {
@@ -161,7 +168,10 @@ public:
                 simViewer->disableExportToFile();
             }
         }
+
+        return true;
     }
+
 
 private slots:
 
@@ -197,13 +207,13 @@ private slots:
                 this, SLOT(load_defaults()));
         QObject::connect(m_sliders["k"], SIGNAL(valueChanged()),
                 this, SLOT(load_defaults()));
-    }
+    }    
 
 
 private:
 
-    DistributionModeWidget* m_distributionMode;
     ExportWidget* m_export;
+    QButtonGroup* m_speedup;
     QComboBox* m_defaults;
     QMap<QString, ParameterSlider*> m_sliders;
 

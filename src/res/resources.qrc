@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="logo">logo.png</file>
+    </qresource>
+    <qresource prefix="/translations">
+        <file>grayscott_de_DE.qm</file>
+    </qresource>
+</RCC>

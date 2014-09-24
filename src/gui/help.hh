@@ -2,9 +2,11 @@
 #define __HELP_HH__
 
 
+#include <QIcon>
 #include <QMessageBox>
 #include <QString>
 #include <QWidget>
+#include "src/gui/text.hh"
 
 
 class Help {
@@ -18,10 +20,14 @@ public:
 
     };
 
-    static void showVersionInformation(QWidget* parent) {
-        QString title = "About grayscottgui";
-        QString text = "<b>grayscottgui 1.0</b><br/><br/>A program to simulate the Gray-Scott model for pattern formation.<br/><br/>Copyright (c) 2014 by Michael Schaefer (<a href=\"http://www.michael-schaefer.org/en/\">www.michael-schaefer.org/en/</a>)";
-        QMessageBox::about(parent, title, text);
+    static void showVersionInformation(QWidget* parent) {        
+        QMessageBox about(parent);
+        about.setWindowTitle(Text::Help::versionInformationTitle());
+        about.setText(Text::Help::versionInformationText());
+        about.setDefaultButton(QMessageBox::Ok);
+        about.setIconPixmap(parent->windowIcon().pixmap(128, 128));
+        about.show();
+        about.exec();
     };
 
 };

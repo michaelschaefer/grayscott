@@ -12,6 +12,7 @@
 #include <QVector>
 #include <QWidget>
 #include "src/gui/colortable.hh"
+#include "src/gui/text.hh"
 
 
 typedef unsigned int uint;
@@ -36,7 +37,7 @@ public:
         m_pixmapHolder->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 
         m_statusLine = new QLabel(parent);
-        m_statusLine->setText("no simulation running");
+        m_statusLine->setText(Text::SimulationViewer::noSimulationRunning());
 
         QVBoxLayout* box = new QVBoxLayout();
         box->addWidget(m_pixmapHolder, 0, Qt::AlignHCenter);

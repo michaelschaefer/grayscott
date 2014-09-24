@@ -32,7 +32,8 @@ public:
         // create widgets
         m_label = new QLabel();
         m_slider = new QSlider(Qt::Orientation::Horizontal);
-        QObject::connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(update_label(int)));
+        QObject::connect(m_slider, SIGNAL(valueChanged(int)),
+                         this, SLOT(update_label(int)));
         setRange(0, 100);
         setValue(50);
 
@@ -52,6 +53,8 @@ public:
     }
 
     void setRange(double min, double max, double step=1) {
+        double value = this->value();
+
         m_offset = min;
         m_delta = max - min;
         m_ticks = int(m_delta / step);
@@ -61,6 +64,8 @@ public:
         m_slider->setSingleStep(1);
         m_slider->setTickInterval(1);
         m_slider->setPageStep(1);
+
+        setValue(value);
     }
 
     inline void setValue(double value) {
@@ -90,7 +95,12 @@ private slots:
 private:
 
     inline int extern_to_intern(double value) const {
-        return (value - m_offset) * m_ticks / m_delta;
+        int v = (value - m_offset) * m_ticks / m_delta;
+        if (v > m_ticks) {
+            return m_ticks;
+        } else {
+            return v;
+        }
     }
 
     inline double intern_to_extern(int value) const {
