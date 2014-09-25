@@ -5,6 +5,7 @@
     <title>About the Gray-Scott model</title>
 
     <style>
+      a:visited { color: blue; }
       body { background-color: none; line-height: 200%; margin: 1em; }
       .formula { padding: 1em; text-align: center; }
     </style>
@@ -19,7 +20,19 @@
     describing the behaviour of two chemical species. Although fairly simple,
     the model is known for an astonishing variety of patterns.
 
-    <h2>Chemical basics</h2>
+    <h2>Contents</h2>
+
+    <ol>
+      <li><a href="#chemical_basics">Chemical basics</a></li>
+      <li><a href="#mathematical_modelling">Mathematical modelling</a></li>
+      <li><a href="#numerical_simulation">Numerical simulation</a></li>
+      <li><a href="#notes">Some notes about the parameters</a></li>
+      <li><a href="#references">References</a></li>
+    </ol>
+
+    <a name="chemical_basics">
+      <h2>1. Chemical basics</h2>
+    </a>
 
     We consider two species U and V. These two species behave according to the
     following reactions:
@@ -36,7 +49,9 @@
     keep them alive, U has to be steadily refilled.
 
 
-    <h2>Mathematical modelling</h2>
+    <a name="mathematical_modelling">
+      <h2>2. Mathematical modelling</h2>
+    </a>
 
     We consider a two-dimensional domain with spacial variables x and y and a
     temporal variable t. If we write the concentrations of U, V as u, v, the
@@ -61,9 +76,10 @@
       </li>
       <li>
 	The first terms on the right (the Laplacians) are <i>diffusion
-	terms</i> which model the effect of Brownian motion (that is, if you
-	give a drop of ink into a glas of water, diffusion makes it to spread
-	out into the entire glas over time).
+	terms</i> which model the effect
+	of <a href="http://en.wikipedia.org/wiki/Brownian_motion">Brownian
+	motion</a> (that is, if you give a drop of ink into a glas of water,
+	diffusion makes it to spread out into the entire glas over time).
       </li>
       <li>
 	The term u·v² is a so called <i>reaction term</i> which corresponds
@@ -87,7 +103,9 @@
     </ul>
 
 
-    <h2>Numerical simulation</h2>
+    <a name="numerical_simulation">
+      <h2>3. Numerical simulation</h2>
+    </a>
     
     In order to numerically simulate the behaviour of the system we consider a
     rectangular grid of N points in each direction (e.g., N=128 by default). The
@@ -96,7 +114,9 @@
     time. The following discretization techniques are used: 
     <ul>
       <li>
-	Temporal derivatives are approximated by the explicit Euler scheme, that is
+	Temporal derivatives are approximated by
+	the <a href="http://en.wikipedia.org/wiki/Euler_method">explicit Euler
+	scheme</a>, that is
 	
 	<div class="formula">
 	  ∂<sub>t</sub>u(x,y,t) ≈ (u(x,y,t) - u(x,y,t-∆t)) / ∆t
@@ -106,7 +126,9 @@
       </li>
       <li>
 	Spacial derivatives are approximated by finite differences. For the
-	whole Laplacian, this results in the famous 5-point stencil, that is
+	whole Laplacian, this results in the
+	famous <a href="http://en.wikipedia.org/wiki/Five-point_stencil">5-point
+	stencil</a>, that is
 	
 	<div class="formula">
 	  ∇²u(x,y,t) ≈ (1/∆h)² · (u(x-∆h,y,t) + u(x+∆h,y,t) + u(x,y-∆h,t) +
@@ -137,7 +159,9 @@
     indeterministic, that is every simulation outcome is different.
 
 
-    <h2>Some notes about the parameters</h2>
+    <a name="notes">
+      <h2>4. Some notes about the parameters</h2>
+    </a>
 
     <ul>
       <li>
@@ -152,6 +176,22 @@
 	outside of this parameter range only constant solutions can be observed
 	which we will not consider as interesting.
       </li>
+    </ul>
+
+
+    <a name="references">
+      <h2>5. References</h2>
+    </a>
+
+    <ul>
+      <li>
+	J. E. Pearson, <i>Complex Patters in a Simple System</i>,
+	Science <b>261</b> (5118), 189-192.
+	DOI:
+	<a href="http://dx.doi.org/10.1126/science.261.5118.189">
+	  10.1126/science.261.5118.189
+	</a>
+      </li> 
     </ul>
 
   </body>

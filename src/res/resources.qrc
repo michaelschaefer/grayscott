@@ -8,5 +8,6 @@
     <qresource prefix="/html">
         <file>model_en.html</file>
         <file>program_en.html</file>
+        <file>model_de.html</file>
     </qresource>
 </RCC>

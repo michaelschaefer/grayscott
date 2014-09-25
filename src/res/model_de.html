@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <title>Über das Gray-Scott-Modell</title>
+
+    <style>
+      a:visited { color: blue; }
+      body { background-color: none; line-height: 200%; margin: 1em; }
+      .formula { padding: 1em; text-align: center; }
+    </style>
+
+  </head>
+
+  <body>
+    
+    <h1>Über das Gray-Scott-Modell</h1>
+
+    Das Gray-Scott-Modell ist ein System sogenannter
+    Reaktions-Diffutions-Gleichungen, welche das Verhalten zweier chemischer
+    Stoffe beschreiben. Obwohl das Modell recht einfach ist, ist es doch für
+    eine erstaunliche Vielfalt an Mustern bekannt.
+
+
+    <h2>Inhalt</h2>
+
+    <ol>
+      <li><a href="#chemical_basics">Chemische Grundlagen</a></li>
+      <li><a href="#mathematical_modelling">Mathematische Modellierung</a></li>
+      <li><a href="#numerical_simulation">Numerische Simulation</a></li>
+      <li><a href="#notes">Einige Bemerkungen zu den Parametern</a></li>
+      <li><a href="#references">Referenzen</a></li>
+    </ol>
+
+    <a name="chemical_basics">
+      <h2>1. Chemische Grundlagen</h2>
+    </a>
+
+    Wir betrachten zwei chemische Stoffe U und V. Diese Stoffe verhalten sich
+    bezüglich der folgenden Reaktionsgleichungen:
+
+    <div class="formula">
+      U + 2V → 3V <br/>
+      V → P
+    </div>
+
+    P ist ein Reaktionsprodukt an dem wir nicht weiter interessiert sind. Wir
+    nehmen an, dass beide Reaktionen irreversibel sind und beide Stoffe
+    zusätzlich zur eigentlichen Reaktion diffundieren können. Aufgrund der
+    Irreversibilität würde der Stoff U nach einiger Zeit aufgebraucht sein und
+    die Reaktionen somit zum Erliegen kommen. Um sie am Laufen zu halten muss U
+    daher kontinuierlich nachgefüllt werden.
+
+
+    <a name="mathematical_modelling">
+      <h2>2. Mathematische Modellierung</h2>
+    </a>
+
+    Wir betrachten ein zwei-dimensionales Gebiet mit den räumlichen Variablen x
+    und y und eine temporale Variable t. Wenn wir die Konzentrationen der Stoffe
+    U und V mit u und v bezeichnen, ergeben sich aus den obigen Reaktionen die
+    folgenden partiellen Differentialgleichungen:
+
+    <div class="formula">
+      ∂<sub>t</sub>u = Du·∇²u - u·v² + F·(1 - u) <br/>
+      ∂<sub>t</sub>v = Dv·∇²v + u·v² - (F + k)·v
+    </div>
+
+    Dabei bezeichnet ∂<sub>t</sub> die partielle Ableitung nach t, ∇² ist der
+    Laplaceoperator (die Summe der räumlichen zweiten Ableitungen), Du und Dv
+    sind Diffusionskonstanten, F bezeichnet die Fütterungsrate und k ist die
+    Reaktionsrate der zweiten Reaktion relativ zur ersten. Wir wollen eine kurze
+    Charakterisierung der einzelnen Terme dieser zwei Gleichungen geben.
+    <ul>
+      <li>
+	Die Terme auf der linken Seite (die partiellen Ableitungen nach t)
+	beschreiben, wie sich die Konzentrationen u und v im Laufe der Zeit
+	entwickeln: sie verändern sich entsprechend der rechten Seite.
+      </li>
+      <li>
+	Die ersten Terme auf der rechten Seite (die Laplaceoperatoren)
+	sind <i>diffusive Terme</i>, die den Effekt
+	der <a href="http://de.wikipedia.org/wiki/Brownsche_Bewegung">Brown'schen
+	Bewegung</a> modellieren (wenn man beispielsweise einen Tropfen Tinte in
+	ein Wasserglas gibt, sorgt die Diffusion dafür, dass sich die Tinte mit
+	der Zeit gleichmäßig im ganzen Glas verteilt).
+      </li>
+      <li>
+	Der Term u·v² wird <i>Reaktionsterm</i> genannt und entstammt direkt der
+	ersten Reaktionsgleichung (der Exponent 2 kommt daher, dass immer zwei
+	Atome von V mit einem Atom von U reagieren). Da in dieser Reaktion U
+	verbraucht und V erzeugt wird taucht der Term einmal mit negativem und
+	einmal mit positivem Vorzeichen auf.
+      </li>
+      <li>
+	Der letzte Term der ersten Gleichung ist ein <i>Fütterungsterm</i>. Er
+	sorgt dafür, dass der Vorrat des Stoffes U aufgefrischt wird und somit
+	die Reaktionen anhalten. Man bemerke, dass der Term proportional zu
+	(1-u) ist, dass also ein geringer Vorrat an U zu einer hohen Fütterung
+	führt und anders herum.
+      </li>
+      <li>
+	Der letzte Term in der zweiten Gleichung ist
+	ein <i>Verbrauchsterm</i>. Der Stoff V wird aus zwei Gründen verbraucht:
+	Zum einen wird er per Modellannahme mit der gleichen Rate aus dem System
+	abgeleitet wie U produziert wird, zum anderen reagiert V mit einer Rate
+	k in das Raktionsprodukt P.
+      </li>
+    </ul>
+
+
+    <a name="numerical_simulation">
+      <h2>3. Numerische Simulation</h2>
+    </a>
+    
+    Um das Verhalten des Systems numerisch zu simulieren betrachten wir ein
+    rechteckiges Gitter mit N Punkten in jede Richtung (etwa N=128 als
+    Standardwert). Das numerische Verfahren besteht nun darin, Approximationen
+    der Konzentrationen u und v an den diskreten Gitterpunkten und für endlich
+    viele Zeitpunkte zu finden. Die folgenden Diskretisierungstechniken werden
+    verwendet: 
+
+    <ul>
+      <li>
+	Zeitliche Ableitungen werden mit
+	dem <a href="http://de.wikipedia.org/wiki/Explizites_Euler-Verfahren">expliziten
+	Euler-Verfahren</a> approximiert, d.h.
+	
+	<div class="formula">
+	  ∂<sub>t</sub>u(x,y,t) ≈ (u(x,y,t) - u(x,y,t-∆t)) / ∆t
+	</div>
+
+	mit einer <i>(Zeit-)Schrittweite</i> ∆t.
+      </li>
+      <li>
+	Räumliche Ableitungen werden mit finiten Differenzen approximiert. Für
+	den kompletten Laplace-Operator ergibt sich daraus der berühmte
+	<a href="http://en.wikipedia.org/wiki/Five-point_stencil">5-Punkt-Stern</a>,
+	d.h.
+	
+	<div class="formula">
+	  ∇²u(x,y,t) ≈ (1/∆h)² · (u(x-∆h,y,t) + u(x+∆h,y,t) + u(x,y-∆h,t) +
+	  u(x,y+∆h,t) - 4·u(x,y,t))
+	</div>
+	
+	mit einer <i>(Orts-)Schrittweite</i> ∆h.
+      </li>
+    </ul>
+
+    Da das System numerisch sehr stabil ist, kann man sowohl ∆h als auch ∆t
+    gleich 1 wählen. Schließlich müssen wir noch einen Anfangszustand für das
+    System angeben, da es zeitabhängig ist. Wir verwenden die folgende
+    Konfiguration: 
+    
+    <ul>
+      <li>
+	Die Konzentration von U wird überall auf 1 gesetzt, außer in einem
+	rechteckigen Bereich in der Mitte des Gitters. Hier verwenden wir den
+	Wert 0.5 mit einer zufälligen Störung von ±1%.
+      </li>
+      <li>
+	Die Konzentration von V wird überall auf 0 gesetzt, außer in dem selben
+	rechteckigen Bereich wie bei U. Dort verwenden wir den Wert 0.25
+	mit einer zufälligen Störung von ebenfalls ±1%.
+      </li>
+    </ul>
+
+    Die zufälligen Störungen dienen dazu, das System unsymmetrisch und
+    nicht-deterministisch zu machen, so dass das Ergebnis jeder Simulation
+    anders ist.
+
+
+    <a name="notes">
+      <h2>4. Einige Bemerkungen zu den Parametern</h2>
+    </a>
+
+    <ul>
+      <li>
+	Die konkreten Werte der Diffusionskoeffizienten Du und Dv sind nicht von
+	entscheidender Bedeutung. Um nicht-triviale Muster zu bekommen muss man
+	lediglich voraussetzen, dass U schneller diffundiert als V. Im konkreten
+	Fall benutzen wir Du=0.16 und Dv=0.08 (also Du/Dv=2).
+      </li>
+      <li>
+	Obwohl man grundsätzlich jeden nicht-negativen Wert für F und k benutzen
+	könnte, beschränken wir uns auf Werte im Intervall [0, 0.1]. Der Grund
+	dafür ist, dass man für Werte außerhalb dieses Intervalls lediglich
+	konstante Lösungen erhält, die wir als nicht interessant betrachten.
+      </li>
+    </ul>
+
+
+    <a name="references">
+      <h2>5. Referenzen</h2>
+    </a>
+
+    <ul>
+      <li>
+	J. E. Pearson, <i>Complex Patters in a Simple System</i>,
+	Science <b>261</b> (5118), 189-192.
+	DOI:
+	<a href="http://dx.doi.org/10.1126/science.261.5118.189">
+	  10.1126/science.261.5118.189
+	</a>
+      </li> 
+    </ul>
+
+  </body>
+</html>
