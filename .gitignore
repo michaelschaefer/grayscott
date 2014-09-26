@@ -2,6 +2,5 @@ material/
 python/temp/
 study/
 *.*~
-*.pro
 *.pro.user
 *.pyc
